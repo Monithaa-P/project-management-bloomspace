@@ -35,29 +35,7 @@ A beautiful, real-time project management tool designed for team collaboration. 
 - **bcryptjs** - Password hashing
 
 ---
-bloomspace-project-management/
-├── server/
-│   ├── models/
-│   │   ├── User.js
-│   │   ├── Project.js
-│   │   ├── Task.js
-│   │   └── Comment.js
-│   ├── routes/
-│   │   ├── auth.js
-│   │   ├── projects.js
-│   │   ├── tasks.js
-│   │   └── comments.js
-│   ├── middleware/
-│   │   └── auth.js
-│   ├── server.js
-│   └── package.json
-├── client/
-│   └── index.html
-└── README.md
 
-
-
----
 
 ## 🚀 Installation & Setup
 
