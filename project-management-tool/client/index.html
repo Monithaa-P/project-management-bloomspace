@@ -1,0 +1,1567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BloomSpace ✿ | Collaborative Project Management</title>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&family=Dancing+Script:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            cursor: none;
+        }
+
+        :root {
+            --blush: #ffb7c5;
+            --rose: #ff9eb5;
+            --lavender: #d4b8d9;
+            --sage: #c1d5c0;
+            --cream: #fff9f0;
+            --peach: #ffd6ba;
+            --mauve: #c8a2c8;
+            --dusty-rose: #dca3a3;
+            --warm-gray: #f7efe8;
+            --text-dark: #5a4a4a;
+            --text-soft: #8b6b6b;
+        }
+
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background: linear-gradient(145deg, #fff5f0 0%, #ffe8f0 100%);
+            color: var(--text-dark);
+            overflow-x: hidden;
+        }
+
+        .cursor {
+            width: 20px;
+            height: 20px;
+            background: radial-gradient(circle, #ffb7c5, #ff9eb5);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            transition: transform 0.1s ease;
+            box-shadow: 0 0 15px #ffb7c5, 0 0 30px #ff9eb5;
+            animation: pulse 2s infinite;
+        }
+
+        .cursor::before {
+            content: '';
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: radial-gradient(circle, rgba(255,183,197,0.3), transparent);
+            border-radius: 50%;
+            top: -10px;
+            left: -10px;
+            animation: cometTrail 0.5s infinite;
+        }
+
+        @keyframes cometTrail {
+            0% { transform: translate(0, 0); opacity: 0.6; }
+            100% { transform: translate(-20px, -20px); opacity: 0; }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        .flower-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .flower {
+            position: absolute;
+            opacity: 0.15;
+            animation: floatFlower 20s infinite ease-in-out;
+        }
+
+        @keyframes floatFlower {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-50px) rotate(10deg); }
+        }
+
+        .auth-overlay {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 1;
+            background: radial-gradient(circle at 30% 20%, rgba(255,245,240,0.95), rgba(255,232,240,0.98));
+        }
+
+        .auth-card {
+            background: rgba(255, 249, 240, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 40px;
+            padding: 50px 48px;
+            width: 100%;
+            max-width: 480px;
+            box-shadow: 0 20px 60px rgba(255,159,181,0.2);
+            border: 1px solid rgba(255,183,197,0.3);
+            position: relative;
+            z-index: 2;
+        }
+
+        .logo-section {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .logo-mark {
+            font-size: 60px;
+            margin-bottom: 10px;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .auth-card h1 {
+            font-family: 'Dancing Script', cursive;
+            font-size: 48px;
+            background: linear-gradient(135deg, #ffb7c5, #c8a2c8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+
+        .auth-subtitle {
+            color: var(--text-soft);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .auth-tabs {
+            display: flex;
+            gap: 10px;
+            background: rgba(255,221,231,0.5);
+            padding: 5px;
+            border-radius: 60px;
+            margin-bottom: 30px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            background: transparent;
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--text-soft);
+            font-family: 'Quicksand', sans-serif;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #ffb7c5, #ff9eb5);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255,159,181,0.3);
+        }
+
+        .auth-form {
+            display: none;
+        }
+
+        .auth-form.active {
+            display: block;
+            animation: fadeInUp 0.4s ease;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .input-field {
+            margin-bottom: 20px;
+        }
+
+        .input-field label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-soft);
+            margin-bottom: 8px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-wrapper i {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #ffb7c5;
+            font-size: 16px;
+        }
+
+        .auth-form input {
+            width: 100%;
+            padding: 14px 16px 14px 46px;
+            border: 2px solid rgba(255,183,197,0.3);
+            border-radius: 30px;
+            font-size: 14px;
+            font-family: 'Quicksand', sans-serif;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .auth-form input:focus {
+            outline: none;
+            border-color: #ffb7c5;
+            box-shadow: 0 0 0 4px rgba(255,183,197,0.1);
+        }
+
+        .auth-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #ffb7c5, #ff9eb5);
+            color: white;
+            border: none;
+            border-radius: 40px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            font-family: 'Quicksand', sans-serif;
+        }
+
+        .auth-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255,159,181,0.4);
+        }
+
+        .app-container {
+            min-height: 100vh;
+            position: relative;
+            z-index: 1;
+        }
+
+        .navbar {
+            background: rgba(255,249,240,0.95);
+            backdrop-filter: blur(10px);
+            padding: 16px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid rgba(255,183,197,0.3);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .nav-brand .logo-mark-small {
+            font-size: 32px;
+            animation: bounce 2s infinite;
+        }
+
+        .nav-brand span {
+            font-family: 'Dancing Script', cursive;
+            font-size: 28px;
+            background: linear-gradient(135deg, #ffb7c5, #c8a2c8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-user {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(255,183,197,0.2);
+            padding: 6px 16px;
+            border-radius: 50px;
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, #ffb7c5, #ff9eb5);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .logout-btn {
+            background: rgba(255,183,197,0.2);
+            border: 1px solid #ffb7c5;
+            padding: 8px 20px;
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--text-soft);
+        }
+
+        .logout-btn:hover {
+            background: #ffb7c5;
+            color: white;
+        }
+
+        .main-layout {
+            display: flex;
+            height: calc(100vh - 80px);
+        }
+
+        .sidebar {
+            width: 320px;
+            background: rgba(255,249,240,0.8);
+            backdrop-filter: blur(8px);
+            border-right: 2px solid rgba(255,183,197,0.3);
+            padding: 24px;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .sidebar-header h3 {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-soft);
+            letter-spacing: 2px;
+        }
+
+        .create-btn {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, #ffb7c5, #ff9eb5);
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            color: white;
+            font-size: 18px;
+            transition: all 0.3s ease;
+        }
+
+        .create-btn:hover {
+            transform: rotate(90deg);
+        }
+
+        .project-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .project-item {
+            padding: 16px;
+            background: white;
+            border-radius: 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255,183,197,0.3);
+        }
+
+        .project-item:hover {
+            transform: translateX(5px);
+            border-color: #ffb7c5;
+            box-shadow: 0 5px 20px rgba(255,159,181,0.15);
+        }
+
+        .project-item.active {
+            background: linear-gradient(135deg, rgba(255,183,197,0.2), rgba(200,162,200,0.2));
+            border-color: #ffb7c5;
+        }
+
+        .project-name {
+            font-weight: 700;
+            font-size: 15px;
+            margin-bottom: 6px;
+            color: var(--text-dark);
+        }
+
+        .project-desc {
+            font-size: 12px;
+            color: var(--text-soft);
+        }
+
+        .content-area {
+            flex: 1;
+            padding: 32px;
+            overflow-y: auto;
+        }
+
+        .project-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .project-header h2 {
+            font-size: 32px;
+            font-weight: 700;
+            font-family: 'Dancing Script', cursive;
+            background: linear-gradient(135deg, #ffb7c5, #c8a2c8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .invite-btn {
+            background: linear-gradient(135deg, #ffb7c5, #ff9eb5);
+            border: none;
+            padding: 14px 28px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 15px rgba(255,159,181,0.4);
+            animation: gentlePulse 2s infinite;
+        }
+
+        .invite-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(255,159,181,0.6);
+        }
+
+        @keyframes gentlePulse {
+            0%, 100% { box-shadow: 0 4px 15px rgba(255,159,181,0.4); }
+            50% { box-shadow: 0 6px 20px rgba(255,159,181,0.7); }
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .column {
+            background: rgba(255,255,255,0.6);
+            backdrop-filter: blur(4px);
+            border-radius: 28px;
+            border: 1px solid rgba(255,183,197,0.3);
+            overflow: hidden;
+        }
+
+        .column-header {
+            padding: 18px;
+            background: linear-gradient(135deg, rgba(255,183,197,0.15), rgba(200,162,200,0.1));
+            border-bottom: 2px solid rgba(255,183,197,0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .column-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .column-badge {
+            background: rgba(255,183,197,0.3);
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .add-task-icon {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #ffb7c5;
+            font-size: 18px;
+            transition: transform 0.3s ease;
+        }
+
+        .add-task-icon:hover {
+            transform: rotate(90deg);
+        }
+
+        .task-list {
+            padding: 16px;
+            min-height: 300px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .task-card {
+            background: white;
+            border-radius: 20px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255,183,197,0.3);
+        }
+
+        .task-card:hover {
+            transform: translateY(-3px);
+            border-color: #ffb7c5;
+            box-shadow: 0 8px 25px rgba(255,159,181,0.15);
+        }
+
+        .task-title {
+            font-weight: 700;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .task-description {
+            font-size: 12px;
+            color: var(--text-soft);
+            margin-bottom: 10px;
+        }
+
+        .priority-tag {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 700;
+        }
+
+        .priority-low { background: #e8f5e9; color: #4caf50; }
+        .priority-medium { background: #fff3e0; color: #ff9800; }
+        .priority-high { background: #ffebee; color: #f44336; }
+        .priority-urgent { background: #fce4ec; color: #e91e63; }
+
+        .discussion-section {
+            background: white;
+            border-radius: 28px;
+            padding: 24px;
+            border: 1px solid rgba(255,183,197,0.3);
+            margin-top: 20px;
+        }
+
+        .discussion-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid rgba(255,183,197,0.3);
+        }
+
+        .discussion-header i {
+            font-size: 24px;
+            color: #ffb7c5;
+        }
+
+        .discussion-header h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .comments-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+
+        .comment-item {
+            background: rgba(255,249,240,0.6);
+            border-radius: 20px;
+            padding: 14px 18px;
+            margin-bottom: 12px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .comment-author {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .comment-avatar {
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, #ffb7c5, #ff9eb5);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .comment-name {
+            font-weight: 700;
+            font-size: 13px;
+            color: var(--text-dark);
+        }
+
+        .comment-time {
+            font-size: 10px;
+            color: var(--text-soft);
+            margin-left: auto;
+        }
+
+        .comment-text {
+            font-size: 13px;
+            color: var(--text-dark);
+            margin-left: 38px;
+            line-height: 1.5;
+        }
+
+        .comment-input-area {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .comment-input-area input {
+            flex: 1;
+            padding: 14px 18px;
+            border: 2px solid rgba(255,183,197,0.3);
+            border-radius: 30px;
+            font-size: 14px;
+            font-family: 'Quicksand', sans-serif;
+        }
+
+        .comment-input-area input:focus {
+            outline: none;
+            border-color: #ffb7c5;
+        }
+
+        .send-comment-btn {
+            background: linear-gradient(135deg, #ffb7c5, #ff9eb5);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 30px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .send-comment-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-card {
+            background: white;
+            border-radius: 40px;
+            width: 90%;
+            max-width: 500px;
+            padding: 40px;
+            animation: modalPop 0.3s ease;
+            border: 2px solid rgba(255,183,197,0.5);
+        }
+
+        @keyframes modalPop {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .modal-header h3 {
+            font-size: 24px;
+            font-weight: 700;
+            font-family: 'Dancing Script', cursive;
+            color: var(--text-dark);
+        }
+
+        .modal-close {
+            font-size: 32px;
+            cursor: pointer;
+            color: #ffb7c5;
+            transition: all 0.3s ease;
+        }
+
+        .modal-close:hover {
+            transform: rotate(90deg);
+        }
+
+        .modal input, .modal textarea, .modal select {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid rgba(255,183,197,0.3);
+            border-radius: 30px;
+            font-size: 14px;
+            font-family: 'Quicksand', sans-serif;
+            margin-bottom: 16px;
+        }
+
+        .modal input:focus, .modal textarea:focus, .modal select:focus {
+            outline: none;
+            border-color: #ffb7c5;
+        }
+
+        .modal-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #ffb7c5, #ff9eb5);
+            color: white;
+            border: none;
+            border-radius: 40px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px;
+            color: var(--text-soft);
+        }
+
+        .empty-state i {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 16px 24px;
+            border-radius: 30px;
+            border-left: 4px solid #ffb7c5;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            z-index: 2000;
+            animation: slideIn 0.3s ease;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .invitation-toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: linear-gradient(135deg, #ffb7c5, #ff9eb5);
+            padding: 20px 28px;
+            border-radius: 30px;
+            color: white;
+            z-index: 2000;
+            animation: slideUp 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            max-width: 350px;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .invitation-toast p {
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .invitation-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .accept-btn, .decline-btn {
+            padding: 8px 20px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .accept-btn {
+            background: white;
+            color: #ff9eb5;
+        }
+
+        .decline-btn {
+            background: rgba(255,255,255,0.3);
+            color: white;
+        }
+
+        @media (max-width: 1024px) {
+            .board {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .board {
+                grid-template-columns: 1fr;
+            }
+            .sidebar {
+                width: 260px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="flower-bg">
+        <div class="flower" style="top: 10%; left: 5%; font-size: 60px;">🌸</div>
+        <div class="flower" style="top: 20%; right: 8%; font-size: 80px; animation-delay: 2s;">🌷</div>
+        <div class="flower" style="bottom: 15%; left: 10%; font-size: 50px; animation-delay: 4s;">🌼</div>
+        <div class="flower" style="bottom: 30%; right: 15%; font-size: 70px; animation-delay: 1s;">🌻</div>
+        <div class="flower" style="top: 50%; left: 20%; font-size: 45px; animation-delay: 3s;">🌺</div>
+        <div class="flower" style="top: 70%; right: 25%; font-size: 55px; animation-delay: 5s;">🌿</div>
+    </div>
+
+    <div class="cursor"></div>
+
+    <div id="authSection" class="auth-overlay">
+        <div class="auth-card">
+            <div class="logo-section">
+                <div class="logo-mark">🌸✨</div>
+                <h1>BloomSpace</h1>
+                <div class="auth-subtitle">where ideas blossom together ✿</div>
+            </div>
+            <div class="auth-tabs">
+                <button class="tab-btn active" onclick="switchTab('login')">🌸 Sign in</button>
+                <button class="tab-btn" onclick="switchTab('register')">🌱 Create account</button>
+            </div>
+            <form id="loginForm" class="auth-form active">
+                <div class="input-field">
+                    <label>Email</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="loginEmail" placeholder="hello@bloomspace.com">
+                    </div>
+                </div>
+                <div class="input-field">
+                    <label>Password</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="loginPassword" placeholder="••••••••">
+                    </div>
+                </div>
+                <button type="submit" class="auth-btn">Bloom into workspace →</button>
+            </form>
+            <form id="registerForm" class="auth-form">
+                <div class="input-field">
+                    <label>Full name</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="registerName" placeholder="Alex Morgan">
+                    </div>
+                </div>
+                <div class="input-field">
+                    <label>Email</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="registerEmail" placeholder="hello@bloomspace.com">
+                    </div>
+                </div>
+                <div class="input-field">
+                    <label>Password</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="registerPassword" placeholder="Create a password">
+                    </div>
+                </div>
+                <button type="submit" class="auth-btn">Start blooming →</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="appSection" style="display: none;">
+        <div class="app-container">
+            <nav class="navbar">
+                <div class="nav-brand">
+                    <div class="logo-mark-small">🌸</div>
+                    <span>BloomSpace</span>
+                </div>
+                <div class="nav-user">
+                    <div class="user-info">
+                        <div class="user-avatar" id="userAvatar"></div>
+                        <span class="user-name" id="userName"></span>
+                    </div>
+                    <button class="logout-btn" onclick="logout()">🌿 Sign out</button>
+                </div>
+            </nav>
+            <div class="main-layout">
+                <aside class="sidebar">
+                    <div class="sidebar-header">
+                        <h3>📁 MY GARDENS</h3>
+                        <button class="create-btn" onclick="showCreateProjectModal()">🌸</button>
+                    </div>
+                    <div id="projectList" class="project-list"></div>
+                </aside>
+                <main class="content-area">
+                    <div id="projectView" style="display: none;">
+                        <div class="project-header">
+                            <h2 id="currentProjectName"></h2>
+                            <button class="invite-btn" onclick="showInviteModal()">
+                                <i class="fas fa-user-plus"></i> Invite Member to Collaborate
+                                <i class="fas fa-sparkles"></i>
+                            </button>
+                        </div>
+
+                        <div class="board">
+                            <div class="column">
+                                <div class="column-header">
+                                    <span class="column-title">📝 To Do <span class="column-badge" id="todoCount">0</span></span>
+                                    <button class="add-task-icon" onclick="showCreateTaskModal('todo')">+</button>
+                                </div>
+                                <div id="todoTasks" class="task-list"></div>
+                            </div>
+                            <div class="column">
+                                <div class="column-header">
+                                    <span class="column-title">⚡ In Progress <span class="column-badge" id="progressCount">0</span></span>
+                                    <button class="add-task-icon" onclick="showCreateTaskModal('in-progress')">+</button>
+                                </div>
+                                <div id="inProgressTasks" class="task-list"></div>
+                            </div>
+                            <div class="column">
+                                <div class="column-header">
+                                    <span class="column-title">🔍 Review <span class="column-badge" id="reviewCount">0</span></span>
+                                    <button class="add-task-icon" onclick="showCreateTaskModal('review')">+</button>
+                                </div>
+                                <div id="reviewTasks" class="task-list"></div>
+                            </div>
+                            <div class="column">
+                                <div class="column-header">
+                                    <span class="column-title">✅ Done <span class="column-badge" id="doneCount">0</span></span>
+                                    <button class="add-task-icon" onclick="showCreateTaskModal('done')">+</button>
+                                </div>
+                                <div id="doneTasks" class="task-list"></div>
+                            </div>
+                        </div>
+
+                        <div class="discussion-section">
+                            <div class="discussion-header">
+                                <i class="fas fa-comments"></i>
+                                <h3>Garden Chat & Discussions</h3>
+                            </div>
+                            <div id="commentsList" class="comments-list">
+                                <div style="text-align:center;color:#c8a2c8;padding:20px;">💬 No messages yet. Start a conversation!</div>
+                            </div>
+                            <div class="comment-input-area">
+                                <input type="text" id="newCommentInput" placeholder="Write a message to your team... 🌸">
+                                <button class="send-comment-btn" onclick="sendComment()">Send <i class="fas fa-paper-plane"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="emptyState" class="empty-state">
+                        <i class="fas fa-seedling"></i>
+                        <h3>No garden selected 🌸</h3>
+                        <p>Choose a project from your garden or plant a new one</p>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+
+    <div id="projectModal" class="modal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>🌸 Plant a new garden</h3>
+                <span class="modal-close" onclick="closeModal('projectModal')">&times;</span>
+            </div>
+            <form id="createProjectForm">
+                <input type="text" id="projectName" placeholder="Garden name" required>
+                <textarea id="projectDesc" placeholder="Describe your garden..."></textarea>
+                <button type="submit" class="modal-btn">🌱 Plant garden</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="taskModal" class="modal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>✨ Plant a new task</h3>
+                <span class="modal-close" onclick="closeModal('taskModal')">&times;</span>
+            </div>
+            <form id="createTaskForm">
+                <input type="text" id="taskTitle" placeholder="Task name" required>
+                <textarea id="taskDesc" placeholder="What needs to bloom?"></textarea>
+                <select id="taskPriority">
+                    <option value="low">🌱 Low priority</option>
+                    <option value="medium">🌿 Medium priority</option>
+                    <option value="high">🌸 High priority</option>
+                    <option value="urgent">🌺 Urgent</option>
+                </select>
+                <input type="date" id="taskDueDate">
+                <button type="submit" class="modal-btn">🌷 Plant task</button>
+            </form>
+            <input type="hidden" id="taskStatus">
+        </div>
+    </div>
+
+    <div id="inviteModal" class="modal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>👥 Invite to your garden</h3>
+                <span class="modal-close" onclick="closeModal('inviteModal')">&times;</span>
+            </div>
+            <form id="inviteForm">
+                <input type="email" id="inviteEmail" placeholder="friend@bloomspace.com" required>
+                <button type="submit" class="modal-btn">🌼 Send Invitation</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const cursor = document.querySelector('.cursor');
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX - 10 + 'px';
+            cursor.style.top = e.clientY - 10 + 'px';
+        });
+
+        let currentUser = null;
+        let currentProject = null;
+        let socket = null;
+
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.innerHTML = `🌸 ${message}`;
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 3000);
+        }
+
+        function showInvitationRequest(inviterName, projectName, projectId, inviterId) {
+    console.log("🎉 Showing invitation toast for project:", projectName);
+    console.log("Current project:", currentProject?._id);
+    
+    if (currentProject && currentProject._id === projectId) {
+        console.log("Already in this project, ignoring invitation");
+        return;
+    }
+    
+    // Remove any existing invitation toasts
+    const existingToasts = document.querySelectorAll('.invitation-toast');
+    existingToasts.forEach(toast => toast.remove());
+    
+    const toast = document.createElement('div');
+    toast.className = 'invitation-toast';
+    toast.innerHTML = `
+        <p>🌸 <strong>${inviterName}</strong> invited you to join <strong>${projectName}</strong> garden!</p>
+        <div class="invitation-buttons">
+            <button class="accept-btn" onclick="acceptInvitation('${projectId}', '${inviterId}', this)">🌿 Accept</button>
+            <button class="decline-btn" onclick="declineInvitation(this)">🌱 Decline</button>
+        </div>
+    `;
+    document.body.appendChild(toast);
+    console.log("✅ Invitation toast added to DOM");
+    
+    setTimeout(() => {
+        if (toast.parentNode) toast.remove();
+    }, 30000);
+}
+        function switchTab(tab) {
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+            const btns = document.querySelectorAll('.tab-btn');
+            
+            if (tab === 'login') {
+                loginForm.classList.add('active');
+                registerForm.classList.remove('active');
+                btns[0].classList.add('active');
+                btns[1].classList.remove('active');
+            } else {
+                loginForm.classList.remove('active');
+                registerForm.classList.add('active');
+                btns[0].classList.remove('active');
+                btns[1].classList.add('active');
+            }
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            try {
+                const res = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    currentUser = data.user;
+                    document.getElementById('authSection').style.display = 'none';
+                    document.getElementById('appSection').style.display = 'block';
+                    document.getElementById('userName').textContent = currentUser.name;
+                    document.getElementById('userAvatar').textContent = currentUser.name.charAt(0).toUpperCase();
+                    loadProjects();
+                    connectSocket();
+                    showNotification(`🌸 Welcome back, ${data.user.name}!`);
+                } else {
+                    alert(data.message || 'Invalid credentials');
+                }
+            } catch (err) {
+                console.error('Login error:', err);
+                showNotification('Something went wrong, please try again');
+            }
+        });
+
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('registerName').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            
+            try {
+                const res = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, password })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    currentUser = data.user;
+                    document.getElementById('authSection').style.display = 'none';
+                    document.getElementById('appSection').style.display = 'block';
+                    document.getElementById('userName').textContent = currentUser.name;
+                    document.getElementById('userAvatar').textContent = currentUser.name.charAt(0).toUpperCase();
+                    loadProjects();
+                    connectSocket();
+                    showNotification(`🌱 Welcome to BloomSpace, ${data.user.name}!`);
+                } else {
+                    alert(data.message || 'Registration failed');
+                }
+            } catch (err) {
+                console.error('Register error:', err);
+                showNotification('Something went wrong, please try again');
+            }
+        });
+
+        document.getElementById('createProjectForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('projectName').value;
+            const description = document.getElementById('projectDesc').value;
+            
+            const res = await fetch('/api/projects', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-auth-token': localStorage.getItem('token')
+                },
+                body: JSON.stringify({ name, description })
+            });
+            if (res.ok) {
+                closeModal('projectModal');
+                loadProjects();
+                document.getElementById('createProjectForm').reset();
+                showNotification(`🌸 New garden "${name}" created!`);
+            }
+        });
+
+        document.getElementById('createTaskForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const title = document.getElementById('taskTitle').value;
+            const description = document.getElementById('taskDesc').value;
+            const priority = document.getElementById('taskPriority').value;
+            const dueDate = document.getElementById('taskDueDate').value;
+            const status = document.getElementById('taskStatus').value;
+            
+            const res = await fetch('/api/tasks', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-auth-token': localStorage.getItem('token')
+                },
+                body: JSON.stringify({ title, description, project: currentProject._id, priority, dueDate, status })
+            });
+            if (res.ok) {
+                const task = await res.json();
+                closeModal('taskModal');
+                loadTasks();
+                if (socket) socket.emit('new-task', { projectId: currentProject._id, task });
+                document.getElementById('createTaskForm').reset();
+                showNotification(`✨ New task "${title}" planted!`);
+            }
+        });
+
+        document.getElementById('inviteForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('inviteEmail').value;
+            
+            const res = await fetch(`/api/projects/${currentProject._id}/invite`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-auth-token': localStorage.getItem('token')
+                },
+                body: JSON.stringify({ email, inviterName: currentUser.name, projectName: currentProject.name })
+            });
+            if (res.ok) {
+                closeModal('inviteModal');
+                document.getElementById('inviteForm').reset();
+                showNotification(`🌼 Invitation sent to ${email}! They'll get a notification.`);
+            } else {
+                const data = await res.json();
+                alert(data.message || 'Could not send invitation');
+            }
+        });
+
+        async function loadProjects() {
+            const res = await fetch('/api/projects', {
+                headers: { 'x-auth-token': localStorage.getItem('token') }
+            });
+            const projects = await res.json();
+            const container = document.getElementById('projectList');
+            container.innerHTML = '';
+            if (projects.length === 0) {
+                container.innerHTML = '<div style="text-align:center;color:#c8a2c8;padding:20px;font-size:13px;">🌸 No gardens yet<br>Click + to plant one</div>';
+                return;
+            }
+            projects.forEach(project => {
+                const div = document.createElement('div');
+                div.className = 'project-item';
+                if (currentProject && currentProject._id === project._id) div.classList.add('active');
+                div.innerHTML = `
+                    <div class="project-name">${project.name}</div>
+                    <div class="project-desc">${project.description?.substring(0, 60) || 'A beautiful garden'}</div>
+                `;
+                div.onclick = () => selectProject(project);
+                container.appendChild(div);
+            });
+        }
+
+        async function selectProject(project) {
+            currentProject = project;
+            document.getElementById('currentProjectName').innerHTML = `🌸 ${project.name}`;
+            document.getElementById('projectView').style.display = 'block';
+            document.getElementById('emptyState').style.display = 'none';
+            if (socket) socket.emit('join-project', project._id);
+            await loadTasks();
+            await loadComments();
+            showNotification(`🌿 You entered "${project.name}" garden`);
+        }
+
+        async function loadTasks() {
+            if (!currentProject) return;
+            const res = await fetch(`/api/tasks/project/${currentProject._id}`, {
+                headers: { 'x-auth-token': localStorage.getItem('token') }
+            });
+            const tasks = await res.json();
+            const columns = {
+                'todo': document.getElementById('todoTasks'),
+                'in-progress': document.getElementById('inProgressTasks'),
+                'review': document.getElementById('reviewTasks'),
+                'done': document.getElementById('doneTasks')
+            };
+            const counts = { 'todo': 0, 'in-progress': 0, 'review': 0, 'done': 0 };
+            Object.keys(columns).forEach(key => columns[key].innerHTML = '');
+            tasks.forEach(task => {
+                const card = document.createElement('div');
+                card.className = 'task-card';
+                card.innerHTML = `
+                    <div class="task-title">${task.title}</div>
+                    <div class="task-description">${task.description?.substring(0, 80) || ''}</div>
+                    <span class="priority-tag priority-${task.priority}">${task.priority}</span>
+                `;
+                card.onclick = () => updateTaskStatus(task);
+                if (columns[task.status]) {
+                    columns[task.status].appendChild(card);
+                    counts[task.status]++;
+                }
+            });
+            document.getElementById('todoCount').textContent = counts['todo'];
+            document.getElementById('progressCount').textContent = counts['in-progress'];
+            document.getElementById('reviewCount').textContent = counts['review'];
+            document.getElementById('doneCount').textContent = counts['done'];
+        }
+
+        async function updateTaskStatus(task) {
+            const newStatus = prompt(`🌸 Current: ${task.status}\n\n🌿 Change to:\n• todo\n• in-progress\n• review\n• done`);
+            if (newStatus && ['todo', 'in-progress', 'review', 'done'].includes(newStatus)) {
+                const res = await fetch(`/api/tasks/${task._id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-auth-token': localStorage.getItem('token')
+                    },
+                    body: JSON.stringify({ status: newStatus })
+                });
+                if (res.ok) {
+                    const updated = await res.json();
+                    if (socket) socket.emit('update-task', { projectId: currentProject._id, task: updated });
+                    loadTasks();
+                    showNotification(`✨ Task "${task.title}" moved to ${newStatus}!`);
+                }
+            }
+        }
+
+        async function loadComments() {
+            if (!currentProject) return;
+            try {
+                const res = await fetch(`/api/comments/project/${currentProject._id}`, {
+                    headers: { 'x-auth-token': localStorage.getItem('token') }
+                });
+                if (res.ok) {
+                    const comments = await res.json();
+                    const container = document.getElementById('commentsList');
+                    if (!comments || comments.length === 0) {
+                        container.innerHTML = '<div style="text-align:center;color:#c8a2c8;padding:20px;">💬 No messages yet. Start a conversation!</div>';
+                        return;
+                    }
+                    container.innerHTML = comments.map(comment => `
+                        <div class="comment-item">
+                            <div class="comment-author">
+                                <div class="comment-avatar">${(comment.userName || 'U')[0].toUpperCase()}</div>
+                                <span class="comment-name">${comment.userName || 'Team Member'}</span>
+                                <span class="comment-time">${new Date(comment.createdAt).toLocaleString()}</span>
+                            </div>
+                            <div class="comment-text">${comment.content}</div>
+                        </div>
+                    `).join('');
+                }
+            } catch (err) {
+                console.error('Load comments error:', err);
+            }
+        }
+
+        async function sendComment() {
+            const input = document.getElementById('newCommentInput');
+            const content = input.value.trim();
+            if (!content) return;
+            
+            try {
+                const res = await fetch('/api/comments', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-auth-token': localStorage.getItem('token')
+                    },
+                    body: JSON.stringify({ content, projectId: currentProject._id, userName: currentUser.name })
+                });
+                if (res.ok) {
+                    const comment = await res.json();
+                    input.value = '';
+                    await loadComments();
+                    if (socket) {
+                        socket.emit('new-comment', { ...comment, projectId: currentProject._id, userName: currentUser.name });
+                    }
+                    showNotification(`💬 You sent a message to the garden!`);
+                } else {
+                    alert('Failed to send message');
+                }
+            } catch (err) {
+                console.error('Send comment error:', err);
+                alert('Failed to send message');
+            }
+        }
+        // Make these functions global for the invitation buttons
+window.acceptInvitation = async (projectId, inviterId, btn) => {
+    console.log("✅ Accept button clicked for project:", projectId);
+    try {
+        const res = await fetch(`/api/projects/${projectId}/accept`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-auth-token': localStorage.getItem('token')
+            }
+        });
+        
+        if (res.ok) {
+            showNotification(`🎉 You joined the garden! Welcome!`);
+            loadProjects();
+            if (btn) btn.closest('.invitation-toast').remove();
+            
+            // Notify inviter
+            if (socket) {
+                socket.emit('invitation-accepted', { 
+                    projectId, 
+                    inviterId, 
+                    userId: currentUser._id,
+                    userName: currentUser.name 
+                });
+            }
+            
+            // Auto-select the project
+            setTimeout(() => {
+                const project = { _id: projectId };
+                selectProject(project);
+            }, 1000);
+        } else {
+            const data = await res.json();
+            alert(data.message || 'Could not join');
+        }
+    } catch (err) {
+        console.error("Accept error:", err);
+        alert('Failed to accept invitation');
+    }
+};
+
+window.declineInvitation = (btn) => {
+    console.log("❌ Decline button clicked");
+    const toast = btn.closest('.invitation-toast');
+    if (toast) toast.remove();
+    showNotification('🌱 Invitation declined');
+};
+
+         function connectSocket() {
+    console.log("🔌 Connecting to socket...");
+    console.log("Current user ID:", currentUser._id);
+    
+    socket = io({
+        transports: ['websocket', 'polling'],
+        reconnection: true,
+        reconnectionAttempts: 5,
+        reconnectionDelay: 1000
+    });
+    
+    socket.on('connect', () => {
+        console.log("✅ Socket connected successfully! Socket ID:", socket.id);
+        socket.emit('register-user', currentUser._id);
+        console.log("📡 Registered user:", currentUser._id);
+    });
+    
+    socket.on('connect_error', (error) => {
+        console.log("❌ Socket connection error:", error.message);
+    });
+    
+    // Listen for invitation event
+    socket.on('invitation-received', (invitation) => {
+        console.log("📨 Invitation received on client:", invitation);
+        if (invitation.inviteeEmail === currentUser.email) {
+            showInvitationRequest(invitation.inviterName, invitation.projectName, invitation.projectId, invitation.inviterId);
+        }
+    });
+    
+    socket.on(`invitation-${currentUser._id}`, (invitation) => {
+        console.log("📨 Direct invitation received:", invitation);
+        showInvitationRequest(invitation.inviterName, invitation.projectName, invitation.projectId, invitation.inviterId);
+    });
+    
+    socket.on('task-created', (task) => {
+        console.log("📝 Task created event:", task);
+        if (currentProject && task.project === currentProject._id) {
+            loadTasks();
+            showNotification(`✨ New task: ${task.title} was added!`);
+        }
+    });
+    
+    socket.on('task-updated', (task) => {
+        console.log("🔄 Task updated event:", task);
+        if (currentProject && task.project === currentProject._id) {
+            loadTasks();
+            showNotification(`🔄 Task "${task.title}" was updated!`);
+        }
+    });
+    
+    socket.on('new-comment', (comment) => {
+        console.log("💬 New comment event:", comment);
+        if (currentProject && comment.projectId === currentProject._id) {
+            loadComments();
+            showNotification(`💬 New message from ${comment.userName}!`);
+        }
+    });
+    
+    socket.on('member-joined', (data) => {
+        console.log("👤 Member joined event:", data);
+        if (currentProject && currentProject._id === data.projectId) {
+            showNotification(`🎉 Welcome ${data.userName} to the garden!`);
+            loadProjects();
+        }
+    });
+}
+        function logout() {
+            if (socket) socket.disconnect();
+            localStorage.clear();
+            location.reload();
+        }
+
+        function showCreateProjectModal() {
+            document.getElementById('projectModal').style.display = 'flex';
+        }
+
+        function showCreateTaskModal(status) {
+            document.getElementById('taskStatus').value = status;
+            document.getElementById('taskModal').style.display = 'flex';
+        }
+
+        function showInviteModal() {
+            if (!currentProject) {
+                alert('🌸 Select a garden first!');
+                return;
+            }
+            document.getElementById('inviteModal').style.display = 'flex';
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).style.display = 'none';
+        }
+
+        async function loadMembers() { return []; }
+        function renderMembers() {}
+    </script>
+</body>
+</html>
